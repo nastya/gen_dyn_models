@@ -6,15 +6,22 @@ import os
 import datetime
 
 #WARNING adb version for genymotion doesn't match adb version for original emulator. Fix in bashrc before running.
-#first argument is a file with a list of programs to generate models and the second argument is a directory for saving models
+#first argument is a file with a list of programs to generate models and 
+#the second argument is a directory for saving models
 #third argument is the indication of the mode (parallel or usual)
 #fourth argument is avd_name (only for parallel mode now)
+#fifth argument is architecture (x86 or arm)
 mode = "usual"
 avd = ""
+arch = ""
 if (len(sys.argv) > 3):
   mode = sys.argv[3]
 if (len(sys.argv) > 4):
   avd = sys.argv[4]
+if (len(sys.argv) > 5):
+  arch = sys.argv[5]
+
+
   
 time_slot = 30*60 # 30 minutes
 models_save_dir = sys.argv[2] + '/'
@@ -24,6 +31,7 @@ if not os.path.exists(models_save_dir):
 
 xpra_session = 100
 max_xpra_num = 0
+# Getting the appropriate number for new xpra session
 if mode == 'parallel':
 	try:
 		out = subprocess.check_output("xpra list", shell=True) #TODO need to substitute all this stuff with regular expressions
@@ -45,7 +53,7 @@ try:
 except subprocess.CalledProcessError:
 	pass
 
-p = subprocess.Popen('./gen_dyn_models.py ' + sys.argv[1] + ' ' + models_save_dir + ' ' + str(xpra_session) + ' ' + mode + ' ' + avd, shell=True)
+p = subprocess.Popen('./gen_dyn_models.py ' + sys.argv[1] + ' ' + models_save_dir + ' ' + str(xpra_session) + ' ' + mode + ' ' + avd +  ' ' + arch, shell=True)
 
 def check_generating_models():
   global p
@@ -94,7 +102,7 @@ def check_generating_models():
       subprocess.check_output(["./stop_emulator.sh", mode, str(xpra_session)]) #cleaning up everything before launch
     except subprocess.CalledProcessError:
       pass
-    p = subprocess.Popen('./gen_dyn_models.py ' + sys.argv[1] + ' ' + models_save_dir + ' ' + str(xpra_session) + ' ' + mode + ' ' + avd, shell=True)
+    p = subprocess.Popen('./gen_dyn_models.py ' + sys.argv[1] + ' ' + models_save_dir + ' ' + str(xpra_session) + ' ' + mode + ' ' + avd + ' ' + arch, shell=True)
 
 
 threading.Timer(time_slot, check_generating_models).start()

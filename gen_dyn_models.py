@@ -15,6 +15,7 @@ models_save_dir = sys.argv[2]
 xpra_session = "100"
 mode = "usual"
 avd = ""
+arch = ""
 
 if (len(sys.argv) > 3):
   xpra_session = sys.argv[3]
@@ -22,8 +23,10 @@ if (len(sys.argv) > 4):
   mode = sys.argv[4]
 if (len(sys.argv) > 5):
   avd = sys.argv[5]
+if (len(sys.argv) > 6):
+  arch = sys.argv[6]
 
-out = check_output(["./start_emulator.sh", analysis_type, xpra_session, avd])
+out = check_output(["./start_emulator.sh", analysis_type, xpra_session, avd, arch])
 if ('Terminating' in out):
 	print out
 	print 'Emulator not started'
@@ -32,7 +35,7 @@ emulator_id = out[out.find('emulator_id:') + len('emulator_id:'):-1]
 print 'emulator_id:', emulator_id
 
 print 'Emulator started'
-call("./remove_odd_packages.py " + analysis_type + ' ' + emulator_id, shell=True)
+call("./remove_odd_packages.py " + avd + ' ' + emulator_id, shell=True)
 #check emulator process is running
 
 # Maybe it runs the same apps several times never getting to the end?
@@ -56,34 +59,34 @@ def process_file(filename, postpone_flag = True):
 		postponed.append(filename)
 		return
 	count += 1
-	if (count % 100 == 0) or (count != 1 and analysis_type == 'droidbox'):
+	if (count % 9 == 0): #or (count != 1 and analysis_type == 'droidbox'):
 							#last condition is for restarting emulator after each app in droidbox mode
 		print 'Restarting emulator'
 		try:
 			call(["./stop_emulator.sh", mode, xpra_session])
 		except CalledProcessError:
 			pass
-		out = check_output(["./start_emulator.sh", analysis_type, xpra_session, avd])
+		out = check_output(["./start_emulator.sh", analysis_type, xpra_session, avd, arch])
 		if ('Terminating' in out):
 			print out
 			print 'Emulator not started'
 			sys.exit(-1)
-		call("./remove_odd_packages.py " + analysis_type + ' ' + emulator_id, shell=True)
+		call("./remove_odd_packages.py " + avd + ' ' + emulator_id, shell=True)
 
 	#check emulator is alive
-	out = check_output(['./check_emulator.sh', analysis_type])
+	out = check_output(['./check_emulator.sh', arch])
 	if ('Emulator not running' in out):
 		print 'Restarting emulator'
 		try:
 			call(["./stop_emulator.sh", mode, xpra_session])
 		except CalledProcessError:
 			pass
-		out = check_output(["./start_emulator.sh", analysis_type, xpra_session, avd])
+		out = check_output(["./start_emulator.sh", analysis_type, xpra_session, avd, arch])
 		if ('Terminating' in out):
 			print out
 			print 'Emulator not started'
 			sys.exit(-1)
-		call("./remove_odd_packages.py " + analysis_type + ' ' + emulator_id, shell=True)
+		call("./remove_odd_packages.py " + avd + ' ' + emulator_id, shell=True)
 
 
 	call(["./process_apk.sh", analysis_type, filename, short_filename, models_save_dir, emulator_id]) #hangs on this call

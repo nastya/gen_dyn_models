@@ -2,19 +2,16 @@
 import subprocess
 import sys
 
-an_type = "usual"
+avd = ""
 
 emulator_id = "emulator-5554"
 if len(sys.argv) >= 2:
-	an_type = sys.argv[1]
+	avd = sys.argv[1]
 if len(sys.argv) >= 3:
 	emulator_id = sys.argv[2]
-if an_type == "droidbox":
-	sys.exit()
 
-if an_type == "usual":
-	orig_packages_file = "packages_on_install_android7.txt"
-else:
+orig_packages_file = "packages_on_install_android7.txt"
+if "API16" in avd:
 	orig_packages_file = "packages_on_install_android4.txt"
 
 
